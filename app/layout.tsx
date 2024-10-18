@@ -4,6 +4,7 @@ import Footer from "@/components/reusable/main/footer";
 import AuthSessionProvider from "./providers/SessionProvider";
 import { getServerSession } from "next-auth";
 import { authConfig } from "./api/auth/[...nextauth]/route";
+import { ChakraProvider } from "@chakra-ui/react";
 
 export const metadata: Metadata = {
   title: "TG Survey Admin UI",
@@ -19,12 +20,14 @@ export default async function RootLayout({
   const session = await getServerSession(authConfig);
 
   return (
-    <html lang="en">
+    <html lang="en" style={{ background: "#000" }}>
       <body>
-        <AuthSessionProvider session={session}>
-          {children}
-          <Footer />
-        </AuthSessionProvider>
+        <ChakraProvider>
+          <AuthSessionProvider session={session}>
+            {children}
+            <Footer />
+          </AuthSessionProvider>
+        </ChakraProvider>
       </body>
     </html>
   );

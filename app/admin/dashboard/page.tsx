@@ -58,12 +58,12 @@ export default function Dashboard() {
           {surveys.map(survey => (
             <li key={survey.id} className="border-b border-gray-200 py-2">
               <div onClick={() => setSelectedSurveyId(survey.survey_id)} className="cursor-pointer">
-                 {new Date(survey.timestamp_added).toLocaleDateString()}
+                {new Date(survey.timestamp_added).toLocaleDateString()}
               </div>
               {selectedSurveyId === survey.survey_id && surveyInfo && (
                 <>
                   {surveyInfo.map((info) => (
-                    <div className="mt-2">
+                    <div className="mt-2" key={info.question_index}>
                       <p><strong>Question {info.question_index}:</strong> {info.question_value}</p>
                       <p><strong>Total Responses:</strong> {info.total_responses}</p>
                     </div>
