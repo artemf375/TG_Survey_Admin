@@ -1,23 +1,23 @@
-import React from "react";
 import type { Metadata } from "next";
+import "@/public/styles/globals.css";
+import Footer from "@/components/reusable/main/footer";
 
 export const metadata: Metadata = {
-    title: "TG Survey Admin UI",
-    description: "",
-};
-
-type RootLayoutProps = {
-    children: React.ReactNode;
+  title: "TG Survey Admin UI",
+  description: "",
 };
 
 export default function RootLayout({
-    children,
-}: RootLayoutProps) {
-    return (
-        <html lang="en">
-            <body>
-                {children}
-            </body>
-        </html>
-    );
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+      <html lang="en">
+        <body>
+          {children}
+          <Footer />
+        </body>
+      </html>
+  );
 }

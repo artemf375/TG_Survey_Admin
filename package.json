@@ -3,13 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 7640",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3040",
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.10.3",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
     "axios": "^1.7.7",
+    "framer-motion": "^11.11.9",
+    "mariadb": "^3.3.2",
+    "mysql2": "^3.11.3",
     "next": "14.2.15",
     "next-auth": "^4.24.8",
     "react": "^18",
