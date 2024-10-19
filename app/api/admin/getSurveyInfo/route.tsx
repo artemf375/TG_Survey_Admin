@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from "@/hooks/getDBConnection";
 import { ApiError } from 'next/dist/server/api-utils';
 import { getToken } from 'next-auth/jwt';
+import { SurveyQuestionInfo } from '@/types/api-types';
+import { RowDataPacket } from 'mysql2/promise';
 
 export async function GET(req: NextRequest) {
   const token = await getToken({ req });
@@ -19,7 +21,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const connection = await connectToDatabase();
-    const [rows]: any = await connection.execute(`
+    const [rows]: [RowDataPacket[], any] = await connection.execute<RowDataPacket[]>(`
       SELECT
         sr.question_index,
         COUNT(*) as total_responses,
@@ -43,9 +45,11 @@ export async function GET(req: NextRequest) {
         sr.question_index;
     `, [survey_id]);
 
+    const result: SurveyQuestionInfo[] = rows as SurveyQuestionInfo[];
+
     return NextResponse.json({
       survey_id,
-      questions: rows.map((row: any) => ({
+      questions: result.map((row: SurveyQuestionInfo) => ({
         question_index: row.question_index,
         total_responses: row.total_responses,
         question_value: row.question_value,

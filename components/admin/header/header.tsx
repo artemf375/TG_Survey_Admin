@@ -1,13 +1,27 @@
 "use client";
 
-import { Flex, Heading } from "@chakra-ui/react";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { Avatar, Button, Divider, Flex, Heading, Highlight, Spinner, Text, useDisclosure } from "@chakra-ui/react";
+import { signOut, useSession } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
 
+import {
+    Drawer,
+    DrawerBody,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+} from '@chakra-ui/react'
+import { UserInfo } from "@/types/api-types";
+import Link from "next/link";
 
 export default function AdminHeader() {
     const { data: session, status } = useSession();
-    const [userName, setUserName] = useState<string | null>(null);
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+    const { isOpen, onOpen, onClose } = useDisclosure()
+    const btnRef = useRef()
 
     useEffect(() => {
         if (!session) {
@@ -16,8 +30,8 @@ export default function AdminHeader() {
 
         fetch(`/api/admin/fetchUser?email=${session.user.email}`)
             .then(response => response.json())
-            .then((data: any) => {
-                setUserName(data[0].owner_name);
+            .then((data: UserInfo) => {
+                setUserInfo(data[0]);
             })
             .catch(error => {
                 console.error('API error:', error);
@@ -35,11 +49,84 @@ export default function AdminHeader() {
             color={"white"}
         >
             <Flex>
-                <Heading>Admin Dashboard</Heading>
+                <Link href={'/admin'}>
+                    <Heading>Admin Dashboard</Heading>
+                </Link>
             </Flex>
             <Flex>
-                <Heading size={'md'}>Hi, {userName}</Heading>
+                {
+                    userInfo ? (
+                        <Avatar
+                            name={userInfo.owner_name}
+                            cursor={'pointer'}
+                            onClick={onOpen}
+                            size={'md'}
+                        />
+                    ) : (
+                        <Spinner
+                            size={'md'}
+                        />
+                    )
+                }
             </Flex>
+            <Drawer
+                isOpen={isOpen}
+                placement='right'
+                onClose={onClose}
+                finalFocusRef={btnRef}
+            >
+                <DrawerOverlay />
+                <DrawerContent>
+                    <DrawerCloseButton />
+                    <DrawerHeader>Your Account</DrawerHeader>
+                    {
+                        userInfo && (
+                            <DrawerBody>
+                                <Flex
+                                    flexDir={'column'}
+                                    justifyContent={'center'}
+                                    alignItems={'left'}
+                                >
+                                    <Text mb={5}>
+                                        Hi, {userInfo.owner_name.split(' ')[0]}
+                                    </Text>
+                                    <Divider />
+                                    <Flex
+                                        flexDir={'column'}
+                                        justifyContent={'left'}
+                                        alignItems={'left'}
+                                        mt={5}
+                                    >
+                                        <Heading size={'md'} mb={5}>Your Profile</Heading>
+                                        <Text mb={5}>
+                                            <Text fontSize={'lg'}>Name:</Text>
+                                            <Highlight query={'Name:'}>
+                                                {userInfo.owner_name}
+                                            </Highlight>
+                                        </Text>
+                                        <Text mb={5}>
+                                            <Text fontSize={'lg'}>Email:</Text>
+                                            <Highlight query={'Email:'}>
+                                                {session.user.email}
+                                            </Highlight>
+                                        </Text>
+                                    </Flex>
+                                </Flex>
+                            </DrawerBody>
+                        )
+                    }
+                    <DrawerFooter>
+                        <Button variant='outline' mr={3} onClick={() => {
+                            signOut({
+                                callbackUrl: '/'
+                            })
+                            onClose()
+                        }}>
+                            Log out
+                        </Button>
+                    </DrawerFooter>
+                </DrawerContent>
+            </Drawer>
         </Flex>
     )
 }

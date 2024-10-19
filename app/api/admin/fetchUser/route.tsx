@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 import { connectToDatabase } from '@/hooks/getDBConnection';
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from 'next/dist/server/api-utils';
-import { getToken } from 'next-auth/jwt';
+import { SurveyOwner } from '@/types/api-types';
 
 export async function GET(req: NextRequest) {
     const token = await getSession();
@@ -21,12 +21,21 @@ export async function GET(req: NextRequest) {
 
     try {
         const connection = await connectToDatabase();
-        const [rows]: any = await connection.execute('SELECT * FROM survey_owners WHERE owner_email = ? LIMIT 1', [user_email]);
-
-        if (rows.length === 0) {
+        console.log(`'SELECT * FROM survey_owners WHERE owner_email = ? LIMIT 1', [${user_email}]`);
+        const [rows]: [any, any] = await connection.execute('SELECT * FROM survey_owners WHERE owner_email = ? LIMIT 1', [user_email]);
+        const result = rows as SurveyOwner[];
+        // rows = new SurveyOwner(rows);
+        if (result.length === 0) {
             return NextResponse.json(new ApiError(404, 'User not found'));
         }
-        return NextResponse.json(rows);
+
+        const user: SurveyOwner = result[0];
+
+        if (!user) {
+            return NextResponse.json(new ApiError(500, 'Invalid user data'));
+        }
+
+        return NextResponse.json(user);
     } catch (error) {
         console.error('Database query error:', error);
         return NextResponse.json(new ApiError(500, 'Internal server error'));

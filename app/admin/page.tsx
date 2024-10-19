@@ -1,6 +1,6 @@
 "use client";
 import { SurveyList, SurveyBasicInfo } from "@/types/api-types";
-import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Progress, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { useSession, signIn } from "next-auth/react";
 import { Suspense, useEffect, useState } from "react";
 
@@ -11,9 +11,16 @@ import {
     AccordionPanel,
     AccordionIcon,
 } from '@chakra-ui/react'
+import { Plus } from "lucide-react";
+import Link from "next/link";
 
 export default function Dashboard() {
-    const { data: session, status } = useSession()
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            signIn();
+        }
+    })
 
     const [surveys, setSurveys] = useState<SurveyList[]>([]);
 
@@ -21,11 +28,6 @@ export default function Dashboard() {
     const [surveyInfo, setSurveyInfo] = useState<SurveyBasicInfo[]>([]);
 
     useEffect(() => {
-        // if (!session) {
-        //   signIn();
-        //   return;
-        // }
-
         fetch(`/api/admin/getSurveys?email=${session?.user?.email}`)
             .then(response => response.json())
             .then((data: SurveyList[]) => {
@@ -34,7 +36,6 @@ export default function Dashboard() {
             .catch(error => {
                 console.error('API error:', error);
             });
-
     }, [session, status])
 
     useEffect(() => {
@@ -56,8 +57,7 @@ export default function Dashboard() {
             .catch(error => {
                 console.error('API error:', error);
             });
-
-    }, [selectedSurveyId])
+    }, [selectedSurveyId, surveyInfo])
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
@@ -71,9 +71,27 @@ export default function Dashboard() {
                 <Flex
                     flexDir={'column'}
                 >
-                    <Heading className="text-4xl font-bold mb-4 text-gray-800">
-                        Your Surveys
-                    </Heading>
+                    <Flex
+                        flexDir={'row'}
+                        justify={'space-between'}
+                    >
+                        <Heading className="text-4xl font-bold mb-4 text-gray-800">
+                            Your Surveys
+                        </Heading>
+                        <Flex
+                            flexDir={'row'}
+                            align={'center'}
+                        >
+                            <Link href={'/admin/new_survey'}>
+                                <Button
+                                    borderRadius={'full'}
+                                    colorScheme={'green'}
+                                >
+                                    <Plus />
+                                </Button>
+                            </Link>
+                        </Flex>
+                    </Flex>
 
                     <Flex
                         flexDir={'column'}
@@ -111,9 +129,6 @@ export default function Dashboard() {
                                                     </AccordionButton>
                                                 </h2>
                                                 <AccordionPanel pb={4}>
-                                                    {/* <Text>
-                            {survey.welcome_message}
-                          </Text> */}
                                                     <Text>
                                                         Added at {new Date(survey.timestamp_added).toLocaleTimeString()} on {new Date(survey.timestamp_added).toLocaleDateString()}
                                                     </Text>
@@ -122,8 +137,15 @@ export default function Dashboard() {
                                                             <div className="mt-2" key={info.question_index}>
                                                                 <p><strong>Question {info.question_index}:</strong> {info.question_value}</p>
                                                                 <p><strong>Total Responses:</strong> {info.total_responses}</p>
+                                                                <Progress colorScheme={'green'} value={info.total_responses} max={surveyInfo.find(info => info.survey_id === survey.survey_id)?.questions.reduce((acc, curr) => Math.max(acc, curr.total_responses), 0)} />
                                                             </div>
-                                                        ))
+                                                        )) ?? (
+                                                            <Stack>
+                                                                <Skeleton height='20px' />
+                                                                <Skeleton height='20px' />
+                                                                <Skeleton height='20px' />
+                                                            </Stack>
+                                                        )
                                                     }
                                                 </AccordionPanel>
                                             </AccordionItem>
@@ -133,27 +155,6 @@ export default function Dashboard() {
                             )
                         }
                     </Flex>
-
-                    {/* <ul>
-          {surveys.length > 0 && surveys.map(survey => (
-            <li key={survey.id} className="border-b border-gray-200 py-2">
-              <div onClick={() => setSelectedSurveyId(survey.survey_id)} className="cursor-pointer">
-                {new Date(survey.timestamp_added).toLocaleDateString()}
-              </div>
-              {selectedSurveyId === survey.survey_id && surveyInfo && (
-                <>
-                  {surveyInfo.map((info) => (
-                    <div className="mt-2" key={info.question_index}>
-                      <p><strong>Question {info.question_index}:</strong> {info.question_value}</p>
-                      <p><strong>Total Responses:</strong> {info.total_responses}</p>
-                    </div>
-                  )
-                  )}
-                </>
-              )}
-            </li>
-          ))}
-        </ul> */}
                 </Flex>
             </Flex>
         </Suspense>

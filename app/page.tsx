@@ -11,7 +11,7 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState(0);
   const [currentMax, setCurrentMax] = useState('px');
   const [totalHeight, setTotalHeight] = useState(0);
-  const totalSteps = 25;
+  const totalSteps = 15;
 
   useEffect(() => {
     const updateSize = () => {
@@ -44,7 +44,7 @@ export default function Home() {
   }
 
   return (
-    <Flex className="relative bg-black" style={{ height: `${totalHeight * 2}px` }}>
+    <Flex className="relative bg-black" style={{ height: `${totalHeight * 2}px` }} overflow={'hidden'}>
       <div className="fixed inset-0 flex items-center justify-center">
         <Flex position="absolute" color="white" ml="50vw" mt="-40vh" fontSize="4xl" zIndex={10}>
           {currentStep >= totalSteps - 1 ? (
