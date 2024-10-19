@@ -4,6 +4,7 @@ import { connectToDatabase } from '@/hooks/getDBConnection';
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from 'next/dist/server/api-utils';
 import { SurveyOwner } from '@/types/api-types';
+import { RowDataPacket } from 'mysql2/promise';
 
 export async function GET(req: NextRequest) {
     const token = await getSession();
@@ -22,8 +23,8 @@ export async function GET(req: NextRequest) {
     try {
         const connection = await connectToDatabase();
         console.log(`'SELECT * FROM survey_owners WHERE owner_email = ? LIMIT 1', [${user_email}]`);
-        const [rows]: [any, any] = await connection.execute('SELECT * FROM survey_owners WHERE owner_email = ? LIMIT 1', [user_email]);
-        const result = rows as SurveyOwner[];
+        const [rows]: [RowDataPacket[], unknown] = await connection.execute<RowDataPacket[]>('SELECT * FROM survey_owners WHERE owner_email = ? LIMIT 1', [user_email]);
+        const result: SurveyOwner[] = rows as SurveyOwner[];
         // rows = new SurveyOwner(rows);
         if (result.length === 0) {
             return NextResponse.json(new ApiError(404, 'User not found'));

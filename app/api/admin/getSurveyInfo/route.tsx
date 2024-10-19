@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const connection = await connectToDatabase();
-    const [rows]: [RowDataPacket[], any] = await connection.execute<RowDataPacket[]>(`
+    const [rows]: [RowDataPacket[], unknown] = await connection.execute<RowDataPacket[]>(`
       SELECT
         sr.question_index,
         COUNT(*) as total_responses,

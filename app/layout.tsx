@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "@/public/styles/globals.css";
 import Footer from "@/components/main/footer/footer";
 import AuthSessionProvider from "./providers/SessionProvider";
-import { getServerSession } from "next-auth";
-import { authConfig } from "./api/auth/[...nextauth]/route";
+import { getServerSession, Session } from "next-auth";
+import authConfig from "./api/auth/[...nextauth]/authConfig";
 import { ChakraProvider } from "@chakra-ui/react";
 
 export const metadata: Metadata = {
@@ -16,8 +16,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  const session = await getServerSession(authConfig);
+  const session = await getServerSession(authConfig) as Session;
 
   return (
     <html lang="en" style={{ background: "#000" }}>
