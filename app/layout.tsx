@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "@/public/styles/globals.css";
-import Footer from "@/components/reusable/main/footer";
+import Footer from "@/components/main/footer/footer";
 import AuthSessionProvider from "./providers/SessionProvider";
 import { getServerSession } from "next-auth";
 import { authConfig } from "./api/auth/[...nextauth]/route";

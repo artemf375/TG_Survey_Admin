@@ -1,17 +1,25 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from "@/hooks/getDBConnection";
+import { ApiError } from 'next/dist/server/api-utils';
+import { getToken } from 'next-auth/jwt';
 
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
+export async function GET(req: NextRequest) {
+  const token = await getToken({ req });
+
+  if (!token && process.env.NODE_ENV !== 'development') {
+    return NextResponse.json(new ApiError(401, 'Unauthorized'));
+  }
+
+  const { searchParams } = new URL(req.url);
   const survey_id = searchParams.get('id');
 
   if (!survey_id) {
-    return NextResponse.json({ status: 401, message: 'Unauthorized' });
+    return NextResponse.json(new ApiError(400, 'Missing survey ID'));
   }
 
   try {
     const connection = await connectToDatabase();
-    const [rows] = await connection.execute(`
+    const [rows]: any = await connection.execute(`
       SELECT
         sr.question_index,
         COUNT(*) as total_responses,
@@ -35,9 +43,16 @@ export async function GET(request) {
         sr.question_index;
     `, [survey_id]);
 
-    return NextResponse.json(rows);
+    return NextResponse.json({
+      survey_id,
+      questions: rows.map((row: any) => ({
+        question_index: row.question_index,
+        total_responses: row.total_responses,
+        question_value: row.question_value,
+      })),
+    });
   } catch (error) {
     console.error('Database query error:', error);
-    return NextResponse.json({ status: 500, message: 'Internal server error' });
+    return NextResponse.json(new ApiError(500, 'Internal server error'));
   }
 }

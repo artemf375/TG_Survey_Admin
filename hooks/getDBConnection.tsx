@@ -1,5 +1,5 @@
 // lib/db.js
-import mysql, {Connection} from 'mysql2/promise';
+import mysql, { Connection } from 'mysql2/promise';
 
 let connection: Connection;
 
@@ -11,8 +11,6 @@ export const connectToDatabase = async () => {
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
     });
-
-    console.log('Connected to MySQL Database');
   }
 
   return connection;
