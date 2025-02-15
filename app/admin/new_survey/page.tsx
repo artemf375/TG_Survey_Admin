@@ -1,10 +1,11 @@
 "use client";
 import { SurveyQuestion } from "@/types/api-types";
-import { Button, Flex, Heading, Text } from "@chakra-ui/react";
+import { Button, Divider, Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Text, Select } from "@chakra-ui/react";
 import { useSession, signIn } from "next-auth/react";
 import { Suspense, useState } from "react";
 
-import { CircleX, Plus, Save } from "lucide-react";
+import { CircleX, Plus, Save, X } from "lucide-react";
+import DragDropGrid from "@/components/admin/new_survey/dragAndDrop";
 
 export default function NewSurvey() {
     useSession({
@@ -38,6 +39,20 @@ export default function NewSurvey() {
         }
     }
 
+    const handleSaveSurvey = async () => {
+        console.log(questions);
+    }
+
+    // useEffect(() => {
+    //     setQuestions([{
+    //         question_index: 0,
+    //         question_value: '',
+    //         question_reply: '',
+    //         question_type: "TEXT",
+    //         reply_markup: JSON.parse('{}'),
+    //     }]);
+    // }, [])
+
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <Flex
@@ -67,6 +82,7 @@ export default function NewSurvey() {
                                 borderRadius={'full'}
                                 colorScheme={'green'}
                                 mr={2}
+                                onClick={handleSaveSurvey}
                             >
                                 <Save />
                             </Button>
@@ -99,7 +115,7 @@ export default function NewSurvey() {
                                     >
                                         <Button
                                             borderRadius={'full'}
-                                            colorScheme={'green'}
+                                            colorScheme={'blue'}
                                             w={'fit-content'}
                                             onClick={() => handleCreateNewQuestion(null)}
                                         >
@@ -118,18 +134,131 @@ export default function NewSurvey() {
                                             flexDir={'column'}
                                         >
                                             <Flex
+                                                flexDir={'row'}
+                                                justify={'space-between'}
+                                                w={'full'}
+                                                mt={5}
+                                            >
+                                                <Heading
+                                                    mb={5}
+                                                >
+                                                    Question {questions.indexOf(question) + 1}
+                                                </Heading>
+                                                <Button
+                                                    borderRadius={'full'}
+                                                    backgroundColor={'gray.100'}
+                                                    onClick={() => {
+                                                        const new_questions = [...questions];
+                                                        new_questions.splice(questions.indexOf(question), 1);
+                                                        setQuestions(new_questions);
+                                                    }}
+                                                >
+                                                    <X />
+                                                </Button>
+                                            </Flex>
+                                            <FormControl>
+                                                <Flex
+                                                    flexDir={'row'}
+                                                    justify={'space-between'}
+                                                    w={'full'}
+                                                    pb={2}
+                                                >
+                                                    <FormLabel>
+                                                        Message
+                                                    </FormLabel>
+                                                </Flex>
+                                                <Input
+                                                    type='text'
+                                                    name={`question_${question.question_index}`}
+                                                    value={question.question_value}
+                                                    onChange={(e) => {
+                                                        const new_questions = [...questions];
+                                                        new_questions[questions.indexOf(question)].question_value = e.target.value;
+                                                        setQuestions(new_questions);
+                                                    }}
+                                                    style={{
+                                                        backgroundColor: 'white',
+                                                        color: 'black',
+                                                    }}
+                                                    required={true}
+                                                />
+                                                <FormHelperText>
+                                                    This is the question that will be asked to the user.
+                                                </FormHelperText>
+                                            </FormControl>
+                                            <FormControl>
+                                                <Flex
+                                                    flexDir={'row'}
+                                                    justify={'space-between'}
+                                                    w={'full'}
+                                                    pb={2}
+                                                    mt={5}
+                                                >
+                                                    <FormLabel>
+                                                        Response
+                                                    </FormLabel>
+                                                </Flex>
+                                                <Input
+                                                    type='text'
+                                                    name={`question_${question.question_index}`}
+                                                    value={question.question_reply}
+                                                    onChange={(e) => {
+                                                        const new_questions = [...questions];
+                                                        new_questions[questions.indexOf(question)].question_reply = e.target.value;
+                                                        setQuestions(new_questions);
+                                                    }}
+                                                    style={{
+                                                        backgroundColor: 'white',
+                                                        color: 'black',
+                                                    }}
+                                                    required={true}
+                                                />
+                                                <FormHelperText>
+                                                    After User answers the question, this is the message that will be sent to the user.
+                                                </FormHelperText>
+                                            </FormControl>
+                                            <Divider />
+                                            <FormControl
+                                                mt={5}
+                                            >
+                                                <FormLabel>
+                                                    What are you expecting as a response?
+                                                </FormLabel>
+                                                <Select
+                                                    style={{
+                                                        backgroundColor: 'white',
+                                                        color: 'black',
+                                                    }}
+                                                    w={'max-content'}
+                                                >
+                                                    <option
+                                                        value="TEXT"
+                                                        selected={question.question_type === 'TEXT'}
+                                                    >
+                                                        Text
+                                                    </option>
+                                                    <option
+                                                        value="VIDEO"
+                                                        selected={question.question_type === 'VIDEO'}
+                                                    >
+                                                        VIDEO
+                                                    </option>
+                                                </Select>
+                                            </FormControl>
+                                            <Flex
                                                 mt={5}
                                                 justify={'flex-end'}
                                             >
                                                 <Button
                                                     borderRadius={'full'}
-                                                    colorScheme={'green'}
+                                                    colorScheme={'blue'}
                                                     w={'fit-content'}
                                                     onClick={() => handleCreateNewQuestion(questions.indexOf(question))}
                                                 >
                                                     <Plus />
                                                 </Button>
                                             </Flex>
+                                            <Divider />
                                         </Flex>
                                     ))}
                                 </Flex>
@@ -137,6 +266,7 @@ export default function NewSurvey() {
                         }
                     </Flex>
                 </Flex>
+                <DragDropGrid />
             </Flex>
         </Suspense>
     );

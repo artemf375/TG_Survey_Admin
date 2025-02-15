@@ -19,7 +19,7 @@ export default async function RootLayout({
   const session = await getServerSession(authConfig) as Session;
 
   return (
-    <html lang="en" style={{ background: "#000" }}>
+    <html lang="en">
       <body>
         <ChakraProvider>
           <AuthSessionProvider session={session}>

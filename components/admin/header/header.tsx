@@ -31,7 +31,7 @@ export default function AdminHeader() {
         fetch(`/api/admin/fetchUser?email=${session.user.email}`)
             .then(response => response.json())
             .then((data: UserInfo) => {
-                setUserInfo(data[0]);
+                setUserInfo(data);
             })
             .catch(error => {
                 console.error('API error:', error);
